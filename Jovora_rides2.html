@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JOVARA Rides 2</title>
+  <style>
+    :root {
+      --green: #087f5b;
+      --green-dark: #066447;
+      --mint: #e8f7f0;
+      --ink: #17231f;
+      --muted: #68766f;
+      --line: #e1e9e4;
+      --surface: #ffffff;
+      --page: #f4f7f5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+    }
+    .app {
+      max-width: 520px;
+      min-height: 100vh;
+      margin: 0 auto;
+      background: var(--surface);
+    }
+    header {
+      background: var(--green-dark);
+      color: white;
+      padding: 22px 20px 26px;
+      border-radius: 0 0 26px 26px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .logo {
+      width: 42px; height: 42px; border-radius: 13px;
+      display: grid; place-items: center; background: white;
+      color: var(--green-dark); font-size: 22px; font-weight: 800;
+      flex-shrink: 0;
+    }
+    h1 { margin: 0; font-size: 22px; letter-spacing: .2px; color: white; }
+    .tagline { margin: 4px 0 0; color: #d8f2e7; font-size: 12px; }
+    .welcome { margin-top: 25px; }
+    .welcome h2 { font-size: 25px; line-height: 1.2; margin: 0 0 7px; color: white; }
+    .welcome p { margin: 0; color: #d8f2e7; font-size: 14px; }
+    main { padding: 18px 16px 28px; }
+    .section-title { font-size: 15px; font-weight: 700; margin: 5px 0 12px; }
+    .map-card {
+      height: 158px; overflow: hidden; border-radius: 18px; position: relative;
+      background-color: #eaf1ed;
+      background-image:
+        linear-gradient(28deg, transparent 46%, #fff 47%, #fff 50%, transparent 51%),
+        linear-gradient(112deg, transparent 43%, #fff 44%, #fff 47%, transparent 48%),
+        linear-gradient(0deg, transparent 65%, #d4e3d9 66%, #d4e3d9 69%, transparent 70%),
+        linear-gradient(90deg, transparent 25%, #d4e3d9 26%, #d4e3d9 29%, transparent 30%);
+      background-size: 160px 100px, 190px 120px, 100% 90px, 100px 100%;
+      border: 1px solid #dce8e0;
+      margin-bottom: 20px;
+    }
+    .map-label {
+      position: absolute; top: 12px; left: 12px; background: white;
+      border-radius: 9px; padding: 7px 10px; font-size: 11px;
+      box-shadow: 0 2px 8px #173c2510;
+    }
+    .map-pin {
+      position: absolute; top: 55px; left: 46%; width: 35px; height: 35px;
+      border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
+      background: var(--green); color: white; display: grid; place-items: center;
+      box-shadow: 0 4px 10px #087f5b40;
+    }
+    .map-pin span { transform: rotate(45deg); font-size: 16px; }
+    .map-note { position: absolute; bottom: 10px; right: 10px; color: #52665a; font-size: 10px; }
+    .location-card { border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+    .field-row { display: flex; gap: 11px; align-items: flex-start; }
+    .field-icon { width: 20px; text-align: center; padding-top: 11px; font-size: 16px; }
+    .field-wrap { flex: 1; min-width: 0; }
+    label { display: block; color: var(--muted); font-size: 11px; margin: 0 0 5px; }
+    input {
+      width: 100%; border: 0; outline: none; padding: 5px 0 12px;
+      font-size: 15px; color: var(--ink); background: transparent;
+    }
+    input::placeholder { color: #9aa69f; }
+    .field-divider { height: 1px; background: var(--line); margin: 0 0 10px 31px; }
+    .section-head { display: flex; justify-content: space-between; align-items: center; margin: 22px 0 11px; gap: 8px; }
+    .section-head .section-title { margin: 0; }
+    .small-muted { font-size: 11px; color: var(--muted); }
+    .ride-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .ride-option {
+      border: 1.5px solid var(--line); border-radius: 16px; padding: 14px 12px;
+      background: white; text-align: left; cursor: pointer; color: var(--ink);
+      width: 100%;
+    }
+    .ride-option.selected { border-color: var(--green); background: var(--mint); box-shadow: 0 0 0 1px var(--green) inset; }
+    .ride-emoji { font-size: 27px; display: block; margin-bottom: 9px; }
+    .ride-name { font-weight: 700; font-size: 14px; display: block; }
+    .ride-desc { font-size: 11px; color: var(--muted); display: block; margin-top: 4px; }
+    .ride-price { display: block; margin-top: 12px; font-size: 13px; font-weight: 700; color: var(--green-dark); }
+    .safety-note {
+      display: flex; gap: 10px; padding: 13px; margin-top: 17px; border-radius: 13px;
+      background: #f0f8f4; color: #2b5844; font-size: 12px; line-height: 1.45;
+    }
+    .safety-note strong { display: block; margin-bottom: 2px; }
+    .primary {
+      width: 100%; border: 0; background: var(--green); color: white;
+      font-size: 15px; font-weight: 700; padding: 16px; border-radius: 14px;
+      margin-top: 18px; cursor: pointer;
+    }
+    .primary:active, .vehicle-button:active { background: var(--green-dark); transform: translateY(1px); }
+    .fine-print { text-align: center; font-size: 10px; color: var(--muted); margin: 11px 0 0; line-height: 1.5; }
+    .status {
+      display: none; margin-top: 15px; padding: 14px; border-radius: 14px;
+      background: var(--mint); border: 1px solid #b9e5d0; font-size: 13px; line-height: 1.5;
+    }
+    .status.show { display: block; }
+    .status strong { display: block; margin-bottom: 4px; color: var(--green-dark); }
+    #vehicleSection {
+      display: none; margin-top: 20px; padding: 16px;
+      border: 1px solid var(--line); border-radius: 18px; background: #fbfdfb;
+    }
+    #vehicleSection h2 { font-size: 20px; margin: 0 0 5px; color: var(--ink); }
+    #vehicleIntro { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+    .vehicle-option {
+      border: 1px solid var(--line); border-radius: 14px; padding: 14px;
+      margin-top: 10px; background: white;
+    }
+    .vehicle-option h3 { margin: 0 0 5px; font-size: 16px; color: var(--ink); }
+    .vehicle-option p { margin: 5px 0; font-size: 12px; color: var(--muted); }
+    .vehicle-option .fare { color: var(--green-dark); font-weight: 700; font-size: 13px; }
+    .vehicle-button {
+      border: 0; width: 100%; margin-top: 9px; padding: 12px;
+      border-radius: 10px; background: var(--green); color: white;
+      font-weight: 700; font-size: 14px; cursor: pointer;
+    }
+    #vehicleMessage { margin: 12px 0 0; font-size: 13px; line-height: 1.6; }
+    .bottom-nav {
+      position: sticky; bottom: 0; display: flex; justify-content: space-around;
+      background: white; border-top: 1px solid var(--line); padding: 11px 4px 9px;
+    }
+    .nav-item {
+      border: 0; background: transparent; color: var(--muted); font-size: 10px;
+      display: grid; gap: 4px; justify-items: center; cursor: pointer; padding: 3px 10px;
+    }
+    .nav-item span:first-child { font-size: 19px; }
+    .nav-item.active { color: var(--green); font-weight: 700; }
+    @media (min-width: 600px) {
+      body { padding: 20px 0; }
+      .app { border-radius: 24px; overflow: hidden; box-shadow: 0 12px 40px #193a2815; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">J</div>
+        <div>
+          <h1>JOVARA</h1>
+          <p class="tagline">YOUR JOURNEY, YOUR WAY.</p>
+        </div>
+      </div>
+      <div class="welcome">
+        <h2>Where are we<br>going today?</h2>
+        <p>Choose your destination and ride type.</p>
+      </div>
+    </header>
+
+    <main>
+      <div class="section-title">Your journey</div>
+      <div class="map-card" aria-label="Illustrative map placeholder">
+        <div class="map-label">📍 Kampala · Map preview</div>
+        <div class="map-pin"><span>↗</span></div>
+        <div class="map-note">Illustration only — live maps come later</div>
+      </div>
+
+      <div class="location-card">
+        <div class="field-row">
+          <div class="field-icon">🟢</div>
+          <div class="field-wrap">
+            <label for="pickup">PICKUP LOCATION</label>
+            <input id="pickup" type="text" placeholder="e.g. Wandegeya, Kampala" autocomplete="street-address">
+          </div>
+        </div>
+        <div class="field-divider"></div>
+        <div class="field-row">
+          <div class="field-icon">📍</div>
+          <div class="field-wrap">
+            <label for="destination">DESTINATION</label>
+            <input id="destination" type="text" placeholder="e.g. Acacia Mall, Kampala">
+          </div>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <div class="section-title">Choose your ride</div>
+        <div class="small-muted">Select one</div>
+      </div>
+      <div class="ride-options">
+        <button class="ride-option selected" type="button" data-ride="car" aria-pressed="true">
+          <span class="ride-emoji">🚗</span>
+          <span class="ride-name">JovaraCar</span>
+          <span class="ride-desc">Comfortable car ride</span>
+          <span class="ride-price">Choose a car below</span>
+        </button>
+        <button class="ride-option" type="button" data-ride="boda" aria-pressed="false">
+          <span class="ride-emoji">🛵</span>
+          <span class="ride-name">Jovara Boda</span>
+          <span class="ride-desc">Quick boda boda ride</span>
+          <span class="ride-price">Affordable travel</span>
+        </button>
+      </div>
+
+      <div class="safety-note">
+        <span style="font-size:21px">🛡️</span>
+        <div><strong>Your safety matters</strong>Planned features include verified drivers, trip sharing, pickup PINs and emergency support.</div>
+      </div>
+
+      <button id="requestRide" class="primary" type="button">Request a Ride</button>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+
+      <section id="vehicleSection" aria-live="polite">
+        <h2>Choose your JOVARA ride</h2>
+        <p id="vehicleIntro">Select the vehicle that suits your journey.</p>
+
+        <div class="vehicle-option" data-ride-type="boda">
+          <h3>🏍️ Boda Boda</h3>
+          <p>Best for one passenger and short journeys.</p>
+          <p>Passenger capacity: 1 passenger</p>
+          <p class="fare">Estimated fare: UGX 2,000–10,000</p>
+          <button class="vehicle-button" type="button" onclick="chooseVehicle('Boda Boda')">Select Boda</button>
+        </div>
+
+        <div class="vehicle-option" data-ride-type="car">
+          <h3>🚗 Standard Car</h3>
+          <p>Comfortable everyday travel.</p>
+          <p>Passenger capacity: Up to 4 passengers</p>
+          <p class="fare">Estimated fare: UGX 5,000–25,000</p>
+          <button class="vehicle-button" type="button" onclick="chooseVehicle('Standard Car')">Select Car</button>
+        </div>
+
+        <div class="vehicle-option" data-ride-type="car">
+          <h3>🚙 Family SUV</h3>
+          <p>Extra space for passengers and luggage.</p>
+          <p>Passenger capacity: Up to 6 passengers (depends on vehicle)</p>
+          <p class="fare">Estimated fare: UGX 10,000–40,000</p>
+          <button class="vehicle-button" type="button" onclick="chooseVehicle('Family SUV')">Select SUV</button>
+        </div>
+
+        <p id="vehicleMessage" role="status" aria-live="polite"></p>
+      </section>
+
+      <p class="fine-print">Prototype only. This does not contact a driver, use live GPS, or charge money. Fares are illustrative estimates.</p>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+      <button class="nav-item active" type="button" data-tab="Home"><span>⌂</span><span>Home</span></button>
+      <button class="nav-item" type="button" data-tab="Trips"><span>◷</span><span>My trips</span></button>
+      <button class="nav-item" type="button" data-tab="Safety"><span>♧</span><span>Safety</span></button>
+      <button class="nav-item" type="button" data-tab="Profile"><span>◉</span><span>Profile</span></button>
+    </nav>
+  
+  </div>
+
+<!-- MY TRIPS SCREEN -->
+<section id="myTripsSection" style="display:none; padding:20px; padding-bottom:90px;">
+  <h2 style="color:#087f3e; margin-bottom:6px;">My Trips</h2>
+  <p style="color:#777; margin-top:0;">
+    View your recent and previous rides.
+  </p>
+
+  <div id="tripHistory">
+    <div style="background:#f5f7f5; padding:25px 15px; border-radius:15px; text-align:center;">
+      <div style="font-size:38px;">🚗</div>
+      <h3 style="margin-bottom:8px;">No trips yet</h3>
+      <p style="color:#777; font-size:14px;">
+        Your completed and requested rides will appear here.
+      </p>
+    </div>
+  </div>
+</section>
+
+  <script>
+    let selectedRide = "car";
+
+    const rideButtons = document.querySelectorAll(".ride-option");
+    const requestButton = document.getElementById("requestRide");
+    const statusBox = document.getElementById("status");
+    const vehicleSection = document.getElementById("vehicleSection");
+    const vehicleIntro = document.getElementById("vehicleIntro");
+    const vehicleMessage = document.getElementById("vehicleMessage");
+
+    rideButtons.forEach(function(button) {
+      button.addEventListener("click", function() {
+        selectedRide = button.dataset.ride;
+
+        rideButtons.forEach(function(otherButton) {
+          otherButton.classList.remove("selected");
+          otherButton.setAttribute("aria-pressed", "false");
+        });
+
+        button.classList.add("selected");
+        button.setAttribute("aria-pressed", "true");
+
+        // If the vehicle list is already open, update it to match the newly selected ride.
+        if (vehicleSection.style.display === "block") {
+          showVehicleOptions();
+        }
+      });
+    });
+
+    requestButton.addEventListener("click", function() {
+      const pickup = document.getElementById("pickup").value.trim();
+      const destination = document.getElementById("destination").value.trim();
+
+      if (!pickup || !destination) {
+        vehicleSection.style.display = "none";
+        statusBox.innerHTML = "<strong>Complete your journey details.</strong>Enter both a pickup location and a destination, then try again.";
+        statusBox.classList.add("show");
+        return;
+      }
+
+      if (pickup.toLowerCase() === destination.toLowerCase()) {
+        vehicleSection.style.display = "none";
+        statusBox.innerHTML = "<strong>Check your locations.</strong>Your pickup and destination appear to be the same. Enter a different destination.";
+        statusBox.classList.add("show");
+        return;
+      }
+
+      localStorage.setItem("jovaraPickup", pickup);
+      localStorage.setItem("jovaraDestination", destination);
+
+      statusBox.classList.remove("show");
+      vehicleMessage.textContent = "";
+      showVehicleOptions();
+      vehicleSection.style.display = "block";
+      vehicleSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    function showVehicleOptions() {
+      document.querySelectorAll(".vehicle-option").forEach(function(vehicle) {
+        const type = vehicle.dataset.rideType;
+        vehicle.style.display = type === selectedRide ? "block" : "none";
+      });
+
+      vehicleIntro.textContent = selectedRide === "boda"
+        ? "Jovara Boda options for your journey."
+        : "Choose a car type for your journey.";
+    }
+
+    function escapeHTML(text) {
+      return String(text).replace(/[&<>"']/g, function(character) {
+        const replacements = {
+          "&": "&amp;", "<": "&lt;", ">": "&gt;",
+          '"': "&quot;", "'": "&#039;"
+        };
+        return replacements[character];
+      });
+    }
+
+    function chooseVehicle(vehicleName) {
+      const pickup = localStorage.getItem("jovaraPickup") || "";
+      const destination = localStorage.getItem("jovaraDestination") || "";
+
+      vehicleMessage.innerHTML =
+        "<strong>" + escapeHTML(vehicleName) + " selected!</strong>" +
+        "<br>Pickup: " + escapeHTML(pickup) +
+        "<br>Destination: " + escapeHTML(destination) +
+        "<br><br>Your selection is ready for the next step." +
+        "<br><small>This is a prototype. No driver has been contacted.</small>";
+
+      vehicleMessage.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+document.querySelectorAll(".nav-item").forEach(function(button) {
+  button.addEventListener("click", function() {
+    document.querySelectorAll(".nav-item").forEach(function(otherButton) {
+      otherButton.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    const tab = button.dataset.tab;
+    const tripsSection = document.getElementById("myTripsSection");
+
+    if (tab === "My trips") {
+      if (tripsSection) {
+        tripsSection.style.display = "block";
+        tripsSection.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+
+      if (statusBox) statusBox.classList.remove("show");
+    } else {
+      if (tripsSection) tripsSection.style.display = "none";
+
+      if (tab !== "Home") {
+        statusBox.innerHTML =
+          "<strong>" + escapeHTML(tab) +
+          " screen</strong> This screen is part of our design plan and will be developed in a later phase.";
+        statusBox.classList.add("show");
+      } else {
+        statusBox.classList.remove("show");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+  });
+});
+
+    
+  </script>
+</body>
+</html>
